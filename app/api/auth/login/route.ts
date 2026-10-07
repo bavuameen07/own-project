@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { createSession, isAuthConfigured, verifyCredentials } from "@/lib/auth";
+import { getRecruitmentList } from "@/lib/recruitment-api";
 
 export const runtime = "nodejs";
+
+/**
+ * Starts loading the recruitment data while the browser follows the redirect,
+ * so the dashboard usually opens from cache instead of waiting on Google Apps
+ * Script. Failures are swallowed — the page still fetches on its own.
+ */
+function warmUpRecruitmentCache(): void {
+  void getRecruitmentList().catch(() => undefined);
+}
 
 function json(body: Record<string, unknown>, status: number): NextResponse {
   return NextResponse.json(body, { status });
@@ -47,6 +57,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   await createSession();
+  warmUpRecruitmentCache();
 
   return json({ success: true, message: "Signed in." }, 200);
 }

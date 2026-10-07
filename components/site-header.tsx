@@ -98,6 +98,10 @@ export function SiteHeader() {
             View Jobs
           </ButtonLink>
 
+          <ButtonLink href="/admin" variant="secondary" size="sm">
+            Admin
+          </ButtonLink>
+
           <button
             type="button"
             onClick={() => setOpen((value) => !value)}

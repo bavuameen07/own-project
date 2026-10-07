@@ -34,12 +34,12 @@ export function WhatsAppButton({
 
   const canOpen = digits.length >= 7;
 
-  async function toggleSent() {
+  async function persist(nextSent: boolean) {
     if (pending) return;
 
-    const next = sent ? "No" : "Yes";
+    const value = nextSent ? "Yes" : "No";
     const previous = sent;
-    setSent(!previous);
+    setSent(nextSent);
     setPending(true);
     setMessage(null);
 
@@ -50,7 +50,7 @@ export function WhatsAppButton({
         body: JSON.stringify({
           action: "updateWhatsAppStatus",
           candidateId,
-          whatsappSent: next,
+          whatsappSent: value,
         }),
       });
 
@@ -70,7 +70,7 @@ export function WhatsAppButton({
         return;
       }
 
-      setMessage({ tone: "success", text: `Marked as ${next.toLowerCase()}.` });
+      setMessage({ tone: "success", text: `Marked as ${value.toLowerCase()}.` });
     } catch {
       setSent(previous);
       setMessage({
@@ -82,6 +82,10 @@ export function WhatsAppButton({
     }
   }
 
+  function handleOpen() {
+    if (!sent) void persist(true);
+  }
+
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center gap-2">
@@ -90,6 +94,7 @@ export function WhatsAppButton({
             href={`https://wa.me/${digits}?text=${encodeURIComponent(prefilled)}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleOpen}
             className={buttonClassName("secondary", "sm")}
             title="Open WhatsApp with a pre-filled message"
           >
@@ -109,7 +114,7 @@ export function WhatsAppButton({
 
         <button
           type="button"
-          onClick={() => void toggleSent()}
+          onClick={() => void persist(!sent)}
           disabled={pending}
           className={buttonClassName(
             sent ? "ghost" : "accent",
@@ -133,7 +138,7 @@ export function WhatsAppButton({
       >
         {message?.text ??
           (canOpen
-            ? "Opens WhatsApp in a new tab — nothing is sent automatically."
+            ? "Opens WhatsApp in a new tab and records the message as sent."
             : "A valid phone number is required.")}
       </p>
     </div>

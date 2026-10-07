@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type StatTone = "neutral" | "accent" | "success" | "warning" | "violet";
+type StatTone = "neutral" | "accent" | "success" | "warning" | "violet" | "danger";
 
 const TONE_CLASSES: Record<StatTone, string> = {
   neutral: "bg-surface-muted text-ink-soft",
@@ -8,6 +8,7 @@ const TONE_CLASSES: Record<StatTone, string> = {
   success: "bg-success-soft text-success",
   warning: "bg-warning-soft text-warning",
   violet: "bg-violet-soft text-violet",
+  danger: "bg-danger-soft text-danger",
 };
 
 interface StatCardProps {

@@ -4,6 +4,7 @@ import { isAuthenticated } from "@/lib/auth";
 import {
   addVacancy,
   applyCandidate,
+  clearRecruitmentCache,
   RecruitmentApiError,
   updateCandidateStatus,
   updateWhatsAppStatus,
@@ -39,6 +40,15 @@ const PUBLIC_ACTIONS = new Set<Action>(["applyCandidate"]);
 
 function badRequest(message: string): NextResponse {
   return NextResponse.json({ success: false, message }, { status: 400 });
+}
+
+/** Success response that also drops any cached reads so the change shows up. */
+function mutated(data: Record<string, unknown> = {}): NextResponse {
+  clearRecruitmentCache();
+  return NextResponse.json(
+    { success: true, ...data },
+    { status: 200 },
+  );
 }
 
 function readPayload(value: unknown): Record<string, unknown> {
@@ -126,14 +136,10 @@ export async function POST(request: Request): Promise<NextResponse> {
           ...values,
         } satisfies ApplyCandidateInput);
 
-        return NextResponse.json(
-          {
-            success: true,
-            message: result.message,
-            data: { candidateId: result.candidateId ?? null },
-          },
-          { status: 200 },
-        );
+        return mutated({
+          message: result.message,
+          data: { candidateId: result.candidateId ?? null },
+        });
       }
 
       case "addVacancy": {
@@ -155,14 +161,10 @@ export async function POST(request: Request): Promise<NextResponse> {
           location: text(body, "location", 100),
         } satisfies AddVacancyInput);
 
-        return NextResponse.json(
-          {
-            success: true,
-            message: result.message,
-            data: { vacancyId: result.vacancyId ?? null },
-          },
-          { status: 200 },
-        );
+        return mutated({
+          message: result.message,
+          data: { vacancyId: result.vacancyId ?? null },
+        });
       }
 
       case "updateCandidateStatus": {
@@ -174,10 +176,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
 
         const result = await updateCandidateStatus({ candidateId, status });
-        return NextResponse.json(
-          { success: true, message: result.message },
-          { status: 200 },
-        );
+        return mutated({ message: result.message });
       }
 
       case "updateWhatsAppStatus": {
@@ -192,10 +191,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           candidateId,
           whatsappSent,
         });
-        return NextResponse.json(
-          { success: true, message: result.message },
-          { status: 200 },
-        );
+        return mutated({ message: result.message });
       }
 
       default:

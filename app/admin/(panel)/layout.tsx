@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { requireAdmin } from "@/lib/auth";
+import { getRecruitmentList } from "@/lib/recruitment-api";
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s · Admin · OpenRoles" },
@@ -15,6 +16,10 @@ export default async function AdminPanelLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   await requireAdmin();
+
+  // Start the sheet read as early as possible: pages rendered underneath this
+  // layout join the same in-flight request instead of starting their own.
+  void getRecruitmentList().catch(() => undefined);
 
   return (
     <div className="min-h-screen bg-canvas">

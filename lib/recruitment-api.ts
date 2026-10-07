@@ -125,24 +125,77 @@ async function readBody(response: Response): Promise<unknown> {
   }
 }
 
+/**
+ * Short-lived server-side cache for read actions.
+ *
+ * Google Apps Script responses regularly take 1–4s (and much longer when the
+ * script is cold). Caching successful GETs for a few seconds makes navigating
+ * between admin pages feel instant, while `clearRecruitmentCache()` (called
+ * after every mutation and by the Refresh button) guarantees fresh data on
+ * demand. In-flight requests are shared so concurrent renders only ever make
+ * one upstream call.
+ */
+const READ_TTL_MS = 15_000;
+
+interface CacheEntry {
+  expires: number;
+  value: unknown;
+}
+
+const readCache = new Map<string, CacheEntry>();
+const inFlight = new Map<string, Promise<unknown>>();
+
+export function clearRecruitmentCache(): void {
+  readCache.clear();
+}
+
+async function cachedGet(
+  key: string,
+  load: () => Promise<unknown>,
+): Promise<unknown> {
+  const hit = readCache.get(key);
+  if (hit && hit.expires > Date.now()) return hit.value;
+
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+
+  const promise = load()
+    .then((value) => {
+      readCache.set(key, { expires: Date.now() + READ_TTL_MS, value });
+      inFlight.delete(key);
+      return value;
+    })
+    .catch((error: unknown) => {
+      inFlight.delete(key);
+      throw error;
+    });
+
+  inFlight.set(key, promise);
+  return promise;
+}
+
 async function callGet(
   action: string,
   params: Record<string, string> = {},
 ): Promise<unknown> {
   const url = buildUrl(action, params);
-  let response: Response;
-  try {
-    response = await fetch(url.toString(), {
-      method: "GET",
-      redirect: "follow",
-      cache: "no-store",
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(GET_TIMEOUT_MS),
-    });
-  } catch (error) {
-    throw toRequestError(error);
-  }
-  return readBody(response);
+  const key = url.toString();
+
+  return cachedGet(key, async () => {
+    let response: Response;
+    try {
+      response = await fetch(key, {
+        method: "GET",
+        redirect: "follow",
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(GET_TIMEOUT_MS),
+      });
+    } catch (error) {
+      throw toRequestError(error);
+    }
+    return readBody(response);
+  });
 }
 
 async function callPost(
@@ -346,6 +399,45 @@ function toRecruitmentGroup(raw: unknown): RecruitmentGroup {
 /* Read actions (GET)                                                          */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * The grouped list payload already contains every vacancy and every candidate,
+ * so detail reads are answered from it while it is still fresh instead of
+ * paying for another Apps Script round trip (typically 1–4s).
+ */
+function peekCachedList(): Record<string, unknown>[] | null {
+  try {
+    const hit = readCache.get(buildUrl("getRecruitmentList", {}).toString());
+    if (!hit || hit.expires <= Date.now()) return null;
+    const object = asObject(hit.value);
+    for (const key of ["data", "vacancies"]) {
+      const value = object[key];
+      if (Array.isArray(value)) {
+        return value.filter(
+          (item): item is Record<string, unknown> =>
+            typeof item === "object" && item !== null && !Array.isArray(item),
+        );
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function sameId(source: unknown, id: string, keys: string[]): boolean {
+  const value = readString(source, ...keys);
+  return value !== undefined && value.toLowerCase() === id.toLowerCase();
+}
+
+function vacancyFromCachedList(vacancyId: string): Record<string, unknown> | null {
+  const list = peekCachedList();
+  if (!list) return null;
+  return (
+    list.find((item) => sameId(item, vacancyId, ["VacancyID", "vacancyId", "id"])) ??
+    null
+  );
+}
+
 export const getVacancies = cache(async function getVacancies(): Promise<
   Vacancy[]
 > {
@@ -367,6 +459,10 @@ export const getVacancy = cache(async function getVacancy(
   if (!id) {
     throw new RecruitmentApiError("Vacancy not found.", "notFound");
   }
+
+  const fromList = vacancyFromCachedList(id);
+  if (fromList) return toVacancy(fromList);
+
   const payload = await callGet("getVacancy", { vacancyId: id });
   return unwrapSingle(payload, ["vacancy", "data"], toVacancy);
 });
@@ -382,6 +478,12 @@ export const getCandidatesByVacancy = cache(
   async function getCandidatesByVacancy(vacancyId: string): Promise<Candidate[]> {
     const id = vacancyId.trim();
     if (!id) return [];
+
+    const group = vacancyFromCachedList(id);
+    if (group && Array.isArray(group.Candidates)) {
+      return group.Candidates.map(toCandidate);
+    }
+
     const payload = await callGet("getCandidatesByVacancy", { vacancyId: id });
     return unwrapList(payload, ["candidates", "data"], toCandidate);
   },
@@ -394,6 +496,19 @@ export const getCandidate = cache(async function getCandidate(
   if (!id) {
     throw new RecruitmentApiError("Candidate not found.", "notFound");
   }
+
+  const cachedList = peekCachedList();
+  if (cachedList) {
+    for (const vacancy of cachedList) {
+      const rawCandidates = vacancy.Candidates;
+      if (!Array.isArray(rawCandidates)) continue;
+      const match = rawCandidates.find((item) =>
+        sameId(item, id, ["CandidateID", "candidateId", "id"]),
+      );
+      if (match) return toCandidate(match);
+    }
+  }
+
   const payload = await callGet("getCandidate", { candidateId: id });
   return unwrapSingle(payload, ["candidate", "data"], toCandidate);
 });

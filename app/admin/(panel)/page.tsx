@@ -14,8 +14,10 @@ import {
   ChartIcon,
   CheckIcon,
   ClockIcon,
+  GridIcon,
   PlusIcon,
   UsersIcon,
+  XMarkIcon,
 } from "@/components/ui/icons";
 import { isOpenVacancy, type RecruitmentGroup } from "@/lib/types";
 import { getRecruitmentList, toUserMessage } from "@/lib/recruitment-api";
@@ -64,9 +66,16 @@ export default async function AdminDashboardPage() {
 
   const stats = [
     {
+      label: "Total Vacancies",
+      value: groups.length,
+      hint: "All vacancies on the sheet",
+      tone: "neutral" as const,
+      icon: <GridIcon className="h-5 w-5" />,
+    },
+    {
       label: "Open Vacancies",
       value: groups.filter((group) => isOpenVacancy(group.vacancy)).length,
-      hint: `${groups.length} total listed`,
+      hint: "Accepting applications",
       tone: "accent" as const,
       icon: <BriefcaseIcon className="h-5 w-5" />,
     },
@@ -105,6 +114,13 @@ export default async function AdminDashboardPage() {
       tone: "success" as const,
       icon: <CheckIcon className="h-5 w-5" />,
     },
+    {
+      label: "Rejected",
+      value: statusCount("Rejected"),
+      hint: "Closed out",
+      tone: "danger" as const,
+      icon: <XMarkIcon className="h-5 w-5" />,
+    },
   ];
 
   const recentCandidates = [...candidates]
@@ -125,7 +141,7 @@ export default async function AdminDashboardPage() {
       />
 
       <section aria-label="Key statistics">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
             <StatCard
               key={stat.label}

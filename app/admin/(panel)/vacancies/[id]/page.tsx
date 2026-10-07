@@ -46,19 +46,24 @@ export default async function AdminVacancyDetailPage({
   let candidatesError: unknown = null;
   let candidates: Awaited<ReturnType<typeof getCandidatesByVacancy>> = [];
 
-  try {
-    vacancy = await getVacancy(id);
-  } catch (error) {
-    if (isNotFound(error)) missing = true;
-    else loadError = error;
+  // Both reads run in parallel — the candidate list only needs the ID.
+  const [vacancyResult, candidatesResult] = await Promise.allSettled([
+    getVacancy(id),
+    getCandidatesByVacancy(id),
+  ]);
+
+  if (vacancyResult.status === "fulfilled") {
+    vacancy = vacancyResult.value;
+  } else if (isNotFound(vacancyResult.reason)) {
+    missing = true;
+  } else {
+    loadError = vacancyResult.reason;
   }
 
-  if (vacancy) {
-    try {
-      candidates = await getCandidatesByVacancy(vacancy.VacancyID);
-    } catch (error) {
-      candidatesError = error;
-    }
+  if (candidatesResult.status === "fulfilled") {
+    candidates = candidatesResult.value;
+  } else if (!loadError && !missing) {
+    candidatesError = candidatesResult.reason;
   }
 
   if (loadError) {
