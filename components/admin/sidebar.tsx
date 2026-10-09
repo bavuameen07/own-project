@@ -7,9 +7,9 @@ import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/site-header";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/", icon: undefined },
-  { label: "Vacancies", href: "/vacancies", icon: undefined },
-  { label: "Candidates", href: "/candidates", icon: undefined },
+  { label: "Dashboard", href: "/admin", icon: undefined },
+  { label: "Vacancies", href: "/admin/vacancies", icon: undefined },
+  { label: "Candidates", href: "/admin/candidates", icon: undefined },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -114,7 +114,7 @@ export function AdminSidebar() {
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-line bg-surface p-4 lg:flex">
         <Link
-          href="/"
+          href="/admin"
           className="mb-6 flex items-center gap-2.5 rounded-xl px-2 py-1.5"
         >
           <span className="block text-sm font-semibold tracking-tight text-ink">
@@ -131,7 +131,7 @@ export function AdminSidebar() {
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-line bg-surface px-5 lg:hidden">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/admin" className="flex items-center gap-2.5">
           <span className="text-sm font-semibold tracking-tight text-ink">
             OpenRoles <span className="font-normal text-ink-faint">· Admin</span>
           </span>
@@ -172,7 +172,7 @@ export function AdminSidebar() {
           />
           <div className="animate-slide-in absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col border-r border-line bg-surface p-4">
             <div className="mb-6 flex items-center justify-between gap-3">
-              <Link href="/" className="flex items-center gap-2.5">
+<Link href="/admin" className="flex items-center gap-2.5">
                 <span className="block text-sm font-semibold tracking-tight text-ink">
                   OpenRoles
                 </span>
