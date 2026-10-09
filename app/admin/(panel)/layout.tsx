@@ -19,7 +19,29 @@ export default async function AdminPanelLayout({
 
   // Start the sheet read as early as possible: pages rendered underneath this
   // layout join the same in-flight request instead of starting their own.
-  void getRecruitmentList().catch(() => undefined);
+  const recruitmentList = await getRecruitmentList().catch((error) => {
+    // Log safe diagnostic on server — never exposed to client
+    console.error(
+      "[AdminPanel] Recruitment list fetch failed:",
+      error instanceof Error ? error.message : String(error),
+    );
+    return null;
+  });
+
+  if (!recruitmentList) {
+    // Dashboard cannot load without recruitment data — surface a clear message
+    return (
+      <div className="min-h-screen bg-canvas p-8 text-center">
+        <h2 className="mb-4 text-xl font-semibold text-danger">
+          Unable to load the dashboard
+        </h2>
+        <p className="text-text-soft">
+          The recruitment service is not configured correctly. Please contact the
+          site administrator.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-canvas">
