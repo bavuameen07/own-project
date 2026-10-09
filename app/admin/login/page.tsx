@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-
-import { LoginForm } from "@/components/admin/login-form";
-import { BrandMark } from "@/components/site-header";
-import { isAuthenticated, safeNextPath } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin Sign In",
@@ -19,16 +14,13 @@ interface LoginPageProps {
 }
 
 export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
-  if (await isAuthenticated()) redirect("/admin");
-
   const params = await searchParams;
   const rawNext = typeof params.next === "string" ? params.next : undefined;
-  const nextUrl = safeNextPath(rawNext) ?? "/admin";
+  const nextUrl = "/" + (rawNext ?? "");
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-5 py-12">
       <Link href="/" className="flex items-center gap-2.5">
-        <BrandMark />
         <span className="text-[1.05rem] font-semibold tracking-tight text-ink">
           OpenRoles
         </span>
@@ -45,7 +37,7 @@ export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           <div className="mt-7">
-            <LoginForm nextUrl={nextUrl} />
+            <p>Admin authentication is not currently configured.</p>
           </div>
         </div>
 

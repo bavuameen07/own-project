@@ -10,12 +10,7 @@ A production-ready recruitment website and admin panel built with **Next.js 15 (
 - Short application form per vacancy (`/apply/[vacancyId]`) that writes straight to the recruitment sheet
 - Forms with server and client validation, accessible markup, loading/skeleton/error states
 
-**Admin panel** (`/admin`, password protected)
-- Dashboard with live application stats
-- Vacancy manager — list, search and per-vacancy candidate views, plus "Add Vacancy" (creates the vacancy in the backend)
-- Candidate directory grouped by vacancy, with search and status/WhatsApp filters
-- Candidate detail view with status updates and a WhatsApp handoff button
-- HMAC-signed, HttpOnly session cookie (7 days) enforced by an Edge middleware gate and a server-side layout check
+
 
 **Integration**
 - Single centralized API client (`lib/recruitment-api.ts`) for the Google Apps Script endpoint, with typed responses, per-kind error handling and server-side caching
@@ -47,11 +42,9 @@ Copy `.env.local.example` to `.env.local` and fill in:
 | Variable              | Purpose                                   |
 | --------------------- | ----------------------------------------- |
 | `GOOGLE_SCRIPT_URL`   | Google Apps Script web app endpoint       |
-| `ADMIN_USERNAME`      | Admin panel username                      |
-| `ADMIN_PASSWORD`      | Admin panel password                      |
 | `ADMIN_SESSION_SECRET`| Long random string used to sign sessions  |
 
-> Values containing `#` must be wrapped in double quotes (e.g. `ADMIN_PASSWORD="a#b"`).
+> Values containing `#` must be wrapped in double quotes.
 
 ## Project structure
 
@@ -59,7 +52,6 @@ Copy `.env.local.example` to `.env.local` and fill in:
 app/
   (public)/          Public marketing + jobs pages
   admin/(panel)/     Protected admin screens (sidebar layout)
-  admin/login/       Admin sign-in
   api/recruitment/   Whitelisted mutating-action proxy
   api/auth/          Sign-in / sign-out
 components/

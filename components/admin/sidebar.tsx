@@ -5,22 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BrandMark } from "@/components/site-header";
-import {
-  BriefcaseIcon,
-  ExternalLinkIcon,
-  GridIcon,
-  LogoutIcon,
-  UsersIcon,
-} from "@/components/ui/icons";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/admin", icon: GridIcon },
-  { label: "Vacancies", href: "/admin/vacancies", icon: BriefcaseIcon },
-  { label: "Candidates", href: "/admin/candidates", icon: UsersIcon },
+  { label: "Dashboard", href: "/", icon: undefined },
+  { label: "Vacancies", href: "/vacancies", icon: undefined },
+  { label: "Candidates", href: "/candidates", icon: undefined },
 ];
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/admin") return pathname === "/admin";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -35,7 +27,6 @@ function NavList({
     <nav aria-label="Admin" className="flex flex-col gap-1">
       {NAV_ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
-        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -43,12 +34,12 @@ function NavList({
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
-              active
-                ? "bg-ink text-white"
-                : "text-ink-soft hover:bg-surface-muted hover:text-ink"
+              active ? "bg-ink text-white" : "text-ink-soft hover:bg-surface-muted hover:text-ink"
             }`}
           >
-            <Icon className="h-[1.15rem] w-[1.15rem]" />
+            <span className="h-4 w-4 rounded bg-surface/40 flex items-center justify-center mr-2">
+              {" "}
+            </span>
             {item.label}
           </Link>
         );
@@ -73,7 +64,6 @@ function SidebarFooter({
         onClick={onNavigate}
         className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink"
       >
-        <ExternalLinkIcon className="h-[1.15rem] w-[1.15rem]" />
         View site
       </Link>
       <button
@@ -82,8 +72,7 @@ function SidebarFooter({
         disabled={loggingOut}
         className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-60"
       >
-        <LogoutIcon className="h-[1.15rem] w-[1.15rem]" />
-        {loggingOut ? "Signing out…" : "Logout"}
+        Logout
       </button>
     </div>
   );
@@ -115,7 +104,7 @@ export function AdminSidebar() {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
       setLoggingOut(false);
-      router.push("/admin/login");
+      router.push("/");
       router.refresh();
     }
   }
@@ -125,17 +114,14 @@ export function AdminSidebar() {
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-line bg-surface p-4 lg:flex">
         <Link
-          href="/admin"
+          href="/"
           className="mb-6 flex items-center gap-2.5 rounded-xl px-2 py-1.5"
         >
-          <BrandMark className="h-8 w-8" />
-          <span>
-            <span className="block text-sm font-semibold tracking-tight text-ink">
-              OpenRoles
-            </span>
-            <span className="block text-[0.7rem] uppercase tracking-[0.16em] text-ink-faint">
-              Admin panel
-            </span>
+          <span className="block text-sm font-semibold tracking-tight text-ink">
+            OpenRoles
+          </span>
+          <span className="block text-[0.7rem] uppercase tracking-[0.16em] text-ink-faint">
+            Admin panel
           </span>
         </Link>
 
@@ -145,8 +131,7 @@ export function AdminSidebar() {
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-line bg-surface px-5 lg:hidden">
-        <Link href="/admin" className="flex items-center gap-2.5">
-          <BrandMark className="h-8 w-8" />
+        <Link href="/" className="flex items-center gap-2.5">
           <span className="text-sm font-semibold tracking-tight text-ink">
             OpenRoles <span className="font-normal text-ink-faint">· Admin</span>
           </span>
@@ -187,15 +172,12 @@ export function AdminSidebar() {
           />
           <div className="animate-slide-in absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col border-r border-line bg-surface p-4">
             <div className="mb-6 flex items-center justify-between gap-3">
-              <Link href="/admin" className="flex items-center gap-2.5">
-                <BrandMark className="h-8 w-8" />
-                <span>
-                  <span className="block text-sm font-semibold tracking-tight text-ink">
-                    OpenRoles
-                  </span>
-                  <span className="block text-[0.7rem] uppercase tracking-[0.16em] text-ink-faint">
-                    Admin panel
-                  </span>
+              <Link href="/" className="flex items-center gap-2.5">
+                <span className="block text-sm font-semibold tracking-tight text-ink">
+                  OpenRoles
+                </span>
+                <span className="block text-[0.7rem] uppercase tracking-[0.16em] text-ink-faint">
+                  Admin panel
                 </span>
               </Link>
               <button
