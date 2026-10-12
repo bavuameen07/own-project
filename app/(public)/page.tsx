@@ -302,10 +302,10 @@ export default function HomePage() {
               <p className="mt-1 text-sm text-ink-soft">
                 Reach the hiring team at{" "}
                 <a
-                  href="mailto:contact@openroles.example"
+                  href="mailto:bavuameen07@gmail.com"
                   className="font-medium text-accent-deep underline-offset-4 hover:underline"
                 >
-                  contact@openroles.example
+                  bavuameen07@gmail.com
                 </a>
               </p>
             </div>

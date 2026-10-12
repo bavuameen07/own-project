@@ -68,11 +68,11 @@ export function SiteHeader() {
         <Link
           href="/"
           className="flex items-center gap-2.5 rounded-lg"
-          aria-label={`${"OpenRoles"} home`}
+          aria-label={`${"Ameen"} home`}
         >
           <BrandMark />
           <span className="text-[1.05rem] font-semibold tracking-tight text-ink">
-            OpenRoles
+            Ameen
           </span>
         </Link>
 

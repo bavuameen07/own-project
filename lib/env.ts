@@ -35,6 +35,6 @@ export function getAdminCredentials(): { username: string; password: string } {
 
 export const ADMIN_SESSION_COOKIE = "admin_session";
 
-export const SITE_NAME = "OpenRoles";
+export const SITE_NAME = "Ameen";
 export const SITE_DESCRIPTION =
   "Discover meaningful career opportunities and take the next step in your professional journey.";

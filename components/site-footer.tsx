@@ -25,7 +25,7 @@ export function SiteFooter() {
           <div className="flex items-center gap-2.5">
             <BrandMark />
             <span className="text-[1.05rem] font-semibold tracking-tight text-ink">
-              OpenRoles
+              Ameen
             </span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-soft">
@@ -55,7 +55,7 @@ export function SiteFooter() {
 
       <div className="border-t border-line">
         <div className="page-container flex flex-col gap-2 py-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>© {YEAR} OpenRoles. All rights reserved.</p>
+          <p>© {YEAR} Ameen. All rights reserved.</p>
           <p>Applications are stored securely and reviewed by the hiring team.</p>
         </div>
       </div>

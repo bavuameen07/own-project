@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import { BrandMark } from "@/components/site-header";
+
+// Auto-logout after 30 minutes of inactivity
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", icon: undefined },
@@ -83,6 +86,46 @@ export function AdminSidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } finally {
+        router.push("/");
+        router.refresh();
+      }
+    }, INACTIVITY_TIMEOUT_MS);
+  }, [router]);
+
+  useEffect(() => {
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, resetInactivityTimer, { passive: true }));
+    resetInactivityTimer();
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetInactivityTimer));
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      logoutOnLeave();
+    };
+  }, [resetInactivityTimer]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      logoutOnLeave();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  async function logoutOnLeave() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", keepalive: true });
+    } catch {
+      // Ignore errors on unload
+    }
+  }
 
   useEffect(() => {
     setOpen(false);
