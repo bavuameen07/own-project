@@ -17,6 +17,14 @@ export function isGoogleScriptConfigured(): boolean {
   return Boolean(process.env.GOOGLE_SCRIPT_URL?.trim());
 }
 
+export function getSessionSecret(): string {
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim();
+  if (!secret) {
+    throw new Error("Missing required environment variable: ADMIN_SESSION_SECRET");
+  }
+  return secret;
+}
+
 export const ADMIN_SESSION_COOKIE = "admin_session";
 
 export const SITE_NAME = "OpenRoles";

@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { cookies } from "next/headers";
 
+import { getSessionSecret } from "@/lib/env";
+
 /**
  * Server-side session management.
  *
@@ -12,8 +14,7 @@ import { cookies } from "next/headers";
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function sign(value: string): string {
-  const secret = "simple-shared-secret-change-in-production";
-  return createHmac("sha256", secret).update(value).digest("hex");
+  return createHmac("sha256", getSessionSecret()).update(value).digest("hex");
 }
 
 /** Constant-time string comparison via HMAC digests. */
