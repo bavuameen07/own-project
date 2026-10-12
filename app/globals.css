@@ -323,3 +323,12 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Development                                                                */
+/* -------------------------------------------------------------------------- */
+
+/* Hide the Next.js dev error overlay portal. It only exists in development. */
+nextjs-portal {
+  display: none !important;
+}

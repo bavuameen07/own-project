@@ -1,8 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { getSessionSecret } from "@/lib/env";
+import { getAdminCredentials, getSessionSecret } from "@/lib/env";
 
 /**
  * Server-side session management.
@@ -42,6 +43,14 @@ export function verifySessionToken(token: string | null | undefined): boolean {
   return secureEquals(signature, sign(expiresAt));
 }
 
+export function verifyCredentials(username: string, password: string): boolean {
+  const expected = getAdminCredentials();
+  return (
+    secureEquals(username, expected.username) &&
+    secureEquals(password, expected.password)
+  );
+}
+
 export async function isAuthenticated(): Promise<boolean> {
   const store = await cookies();
   return verifySessionToken(store.get("admin_session")?.value ?? null);
@@ -63,6 +72,8 @@ export async function destroySession(): Promise<void> {
   store.delete("admin_session");
 }
 
-export function requireAdmin() {
-  return;
+export async function requireAdmin(): Promise<void> {
+  if (!(await isAuthenticated())) {
+    redirect("/admin/login?next=admin");
+  }
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { LoginForm } from "@/components/admin/login-form";
+
 export const metadata: Metadata = {
   title: "Admin Sign In",
   description: "Sign in to the OpenRoles recruitment admin panel.",
@@ -16,7 +18,7 @@ interface LoginPageProps {
 export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const rawNext = typeof params.next === "string" ? params.next : undefined;
-  const nextUrl = "/" + (rawNext ?? "");
+  const nextUrl = "/" + (rawNext ?? "").replace(/^\/+/, "");
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-5 py-12">
@@ -37,7 +39,7 @@ export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           <div className="mt-7">
-            <p>Admin authentication is not currently configured.</p>
+            <LoginForm nextUrl={nextUrl} />
           </div>
         </div>
 
