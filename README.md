@@ -35,16 +35,11 @@ npm run lint
 npm run typecheck
 ```
 
-### Environment variables
+### Configuration
 
-Copy `.env.local.example` to `.env.local` and fill in:
-
-| Variable              | Purpose                                   |
-| --------------------- | ----------------------------------------- |
-| `GOOGLE_SCRIPT_URL`   | Google Apps Script web app endpoint       |
-| `ADMIN_SESSION_SECRET`| Long random string used to sign sessions  |
-
-> Values containing `#` must be wrapped in double quotes.
+Runtime values are defined directly in `lib/env.ts` (Google Apps Script URL and
+the admin session signing secret). They can still be overridden at deploy time by
+setting `GOOGLE_SCRIPT_URL` and `ADMIN_SESSION_SECRET` environment variables.
 
 ## Project structure
 
