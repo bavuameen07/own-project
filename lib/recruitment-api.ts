@@ -135,7 +135,7 @@ async function readBody(response: Response): Promise<unknown> {
  * demand. In-flight requests are shared so concurrent renders only ever make
  * one upstream call.
  */
-const READ_TTL_MS = 15_000;
+const READ_TTL_MS = 60_000;
 
 interface CacheEntry {
   expires: number;
